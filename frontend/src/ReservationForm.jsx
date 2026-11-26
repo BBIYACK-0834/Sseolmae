@@ -63,21 +63,25 @@ export default function ReservationForm() {
       <fieldset disabled={pending}>
         <legend>방문 정보</legend>
         <div className="field-grid">
-          <label>방문 날짜
-            <input type="date" name="visitDate" required min={venueToday()} value={values.visitDate} onChange={update} />
-          </label>
-          <label>이용권
-            <select name="ticketType" required value={values.ticketType} onChange={update}>
+          <div className="field">
+            <label htmlFor="visitDate">방문 날짜</label>
+            <input id="visitDate" type="date" name="visitDate" required min={venueToday()} value={values.visitDate} onChange={update} />
+          </div>
+          <div className="field">
+            <label htmlFor="ticketType">이용권</label>
+            <select id="ticketType" name="ticketType" required value={values.ticketType} onChange={update}>
               <option value="">이용권 선택</option>
               {Object.entries(ticketLabels).map(([value, title]) => <option key={value} value={value}>{title}</option>)}
             </select>
-          </label>
-          <label>성인 인원
-            <input type="number" name="adults" min="0" max="20" step="1" required value={values.adults} onChange={update} />
-          </label>
-          <label>어린이 인원
-            <input type="number" name="children" min="0" max="20" step="1" required value={values.children} onChange={update} />
-          </label>
+          </div>
+          <div className="field">
+            <label htmlFor="adults">성인 인원</label>
+            <input id="adults" type="number" name="adults" min="0" max="20" step="1" required value={values.adults} onChange={update} />
+          </div>
+          <div className="field">
+            <label htmlFor="children">어린이 인원</label>
+            <input id="children" type="number" name="children" min="0" max="20" step="1" required value={values.children} onChange={update} />
+          </div>
         </div>
         {error && <p className="error" role="alert">{error}</p>}
         <button className="button" type="submit">{pending ? '요청 중…' : '테스트 예매 접수'}</button>

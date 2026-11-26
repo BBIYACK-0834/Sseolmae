@@ -81,7 +81,8 @@ summary { color: var(--forest); font-weight: 700; font-size: .88rem; cursor: poi
 .form-box .button { margin-top: 1rem; }
 fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 legend { padding: 0; margin-bottom: .85rem; font-size: 1.2rem; font-weight: 750; }
-label { display: grid; gap: .3rem; min-width: 0; font-size: .88rem; font-weight: 700; }
+.field { display: grid; gap: .3rem; min-width: 0; }
+label { font-size: .88rem; font-weight: 700; }
 input, select { width: 100%; min-width: 0; padding: .55rem; border: 1px solid #8b9a91; border-radius: .4rem; background: white; color: inherit; }
 .muted { color: var(--muted); }
 .error { color: #962d24; }
