@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: sseolmae-api
+  mvc:
+    problemdetails:
+      enabled: true
+  jackson:
+    deserialization:
+      accept-float-as-int: false
