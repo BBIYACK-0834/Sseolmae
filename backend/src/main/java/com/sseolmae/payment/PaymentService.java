@@ -102,8 +102,9 @@ public class PaymentService {
         case "ABORTED", "EXPIRED", "CANCELED" ->
           db.update("UPDATE booking SET status='CANCELLED' WHERE id=?", id);
         case "DONE" -> {
-          if (result.approvedAt() == null)
-            throw new ResponseStatusException(BAD_GATEWAY, "승인 시각을 확인 중입니다.");
+          if (result.approvedAt() == null || !"KRW".equals(result.currency())
+              || !Integer.valueOf(amount).equals(result.balanceAmount()))
+            throw new ResponseStatusException(BAD_GATEWAY, "승인 시각, 통화 및 결제 잔액을 확인 중입니다.");
           db.update("UPDATE payment SET approved_at=? WHERE booking_id=?", result.approvedAt(), id);
           db.update("UPDATE booking SET status='CONFIRMED' WHERE id=?", id);
         }

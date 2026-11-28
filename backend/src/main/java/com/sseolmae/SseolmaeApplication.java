@@ -11,7 +11,9 @@ import org.springframework.context.annotation.Bean;
 public class SseolmaeApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(SseolmaeApplication.class, args);
+    var app = new SpringApplication(SseolmaeApplication.class);
+    app.addInitializers(context -> ProductionSettings.validate(context.getEnvironment()));
+    app.run(args);
   }
 
   @Bean

@@ -6,3 +6,7 @@ server:
         secure: true
         http-only: true
         same-site: lax
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never

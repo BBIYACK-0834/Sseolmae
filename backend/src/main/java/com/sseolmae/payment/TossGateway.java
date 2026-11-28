@@ -25,7 +25,7 @@ public class TossGateway {
       String orderId,
       int totalAmount,
       String status,
-      OffsetDateTime approvedAt) {}
+      OffsetDateTime approvedAt, String currency, Integer balanceAmount) {}
 
   private final String secret;
   private final RestClient client;
@@ -80,7 +80,7 @@ public class TossGateway {
                       "REJECT_CARD_PAYMENT",
                       "PAYMENT_EXPIRED")
                   .contains(failure.code())) {
-            return new Result(key, id.toString(), amount, "ABORTED", null);
+            return new Result(key, id.toString(), amount, "ABORTED", null, null, null);
           }
         }
         throw lookup;

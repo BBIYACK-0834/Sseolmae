@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 public class ReservationController {
+  private final com.sseolmae.payment.TossGateway gateway;
   private final Accounts accounts;
   private final ReservationService bookings;
 
-  public ReservationController(Accounts accounts, ReservationService bookings) {
+  public ReservationController(Accounts accounts, ReservationService bookings, com.sseolmae.payment.TossGateway gateway) {
+    this.gateway = gateway;
     this.accounts = accounts;
     this.bookings = bookings;
   }
@@ -28,6 +30,7 @@ public class ReservationController {
   @PostMapping("/reservations")
   ResponseEntity<Reservation> create(
       Authentication auth, @RequestBody @Valid ReservationRequest request) {
+    gateway.requireSetup();
     var booking = bookings.create(accounts.id(auth), request);
     return ResponseEntity.created(URI.create("/api/reservations/" + booking.id())).body(booking);
   }

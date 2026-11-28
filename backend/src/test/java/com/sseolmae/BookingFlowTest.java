@@ -110,7 +110,7 @@ class BookingFlowTest {
         .andExpect(status().isBadRequest());
     when(toss.confirm(id, key, 24000))
         .thenReturn(
-            new TossGateway.Result(key, id.toString(), 24000, "DONE", OffsetDateTime.now()));
+            new TossGateway.Result(key, id.toString(), 24000, "DONE", OffsetDateTime.now(), "KRW", 24000));
     body.put("amount", 24000);
     for (int i = 0; i < 2; i++)
       mvc.perform(
@@ -172,7 +172,7 @@ class BookingFlowTest {
     when(toss.confirm(id, key, 24000))
         .thenThrow(new org.springframework.web.client.ResourceAccessException("timeout"))
         .thenReturn(
-            new TossGateway.Result(key, id.toString(), 24000, "DONE", OffsetDateTime.now()));
+            new TossGateway.Result(key, id.toString(), 24000, "DONE", OffsetDateTime.now(), "KRW", 24000));
     mvc.perform(
             post("/api/payments/confirm")
                 .with(user("interrupted"))
@@ -192,7 +192,7 @@ class BookingFlowTest {
     UUID id = reserve("declined", payload(UUID.randomUUID()));
     var key = "decline-" + id;
     when(toss.confirm(id, key, 24000))
-        .thenReturn(new TossGateway.Result(key, id.toString(), 24000, "ABORTED", null));
+        .thenReturn(new TossGateway.Result(key, id.toString(), 24000, "ABORTED", null,null,null));
     var body =
         json.createObjectNode()
             .put("orderId", id.toString())
@@ -220,11 +220,11 @@ class BookingFlowTest {
         .put("amount",24000).toString();
     mvc.perform(post("/api/payments/confirm").with(user("other")).with(csrf())
         .contentType("application/json").content(body)).andExpect(status().isNotFound());
-    when(toss.confirm(id,key,24000)).thenReturn(new TossGateway.Result(key,id.toString(),24000,null,null));
+    when(toss.confirm(id,key,24000)).thenReturn(new TossGateway.Result(key,id.toString(),24000,null,null,null,null));
     mvc.perform(post("/api/payments/confirm").with(user("offline")).with(csrf())
         .contentType("application/json").content(body)).andExpect(status().isBadGateway());
-    when(toss.lookup(id)).thenReturn(new TossGateway.Result(key,id.toString(),1,"DONE",OffsetDateTime.now()))
-        .thenReturn(new TossGateway.Result(key,id.toString(),24000,"DONE",OffsetDateTime.now()));
+    when(toss.lookup(id)).thenReturn(new TossGateway.Result(key,id.toString(),24000,"DONE",OffsetDateTime.now(),"KRW",12000))
+        .thenReturn(new TossGateway.Result(key,id.toString(),24000,"DONE",OffsetDateTime.now(),"KRW",24000));
     recovery.reconcile();
     mvc.perform(get("/api/reservations/"+id).with(user("offline"))).andExpect(jsonPath("$.status").value("PROCESSING"));
     db.update("UPDATE payment SET next_check_at=CURRENT_TIMESTAMP WHERE booking_id=?",id);

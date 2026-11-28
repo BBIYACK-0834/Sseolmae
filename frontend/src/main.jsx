@@ -49,6 +49,11 @@ function App() {
   const [catalog, setCatalog] = useState([])
   useEffect(() => {
     const sync = () => setRoute(section())
+    const expire = () => {
+      location.replace('/#login')
+      location.reload()
+    }
+    window.addEventListener('session-expired', expire)
     window.addEventListener('hashchange', sync)
     request('/session')
       .then(setSession)
@@ -56,7 +61,10 @@ function App() {
     request('/experiences')
       .then(setCatalog)
       .catch(() => {})
-    return () => window.removeEventListener('hashchange', sync)
+    return () => {
+      window.removeEventListener('session-expired', expire)
+      window.removeEventListener('hashchange', sync)
+    }
   }, [])
   useEffect(() => {
     if (route === 'experiences' || route === 'visit')
