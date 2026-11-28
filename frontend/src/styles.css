@@ -1,100 +1,370 @@
 :root {
-  font-family: "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
-  color: #172820;
-  background: #f8f7f2;
+  font-family: 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
+  color: #142332;
+  background: #f6f8f9;
   line-height: 1.6;
-  font-synthesis: none;
-  --forest: #132f29;
-  --lime: #e0f78b;
-  --mint: #ddeade;
-  --muted: #506259;
+  --navy: #122537;
+  --ice: #c6f0ea;
+  --muted: #526474;
 }
-
-* { box-sizing: border-box; }
-body { margin: 0; }
-a { color: inherit; text-decoration: none; }
-h1, h2, h3, p { margin: 0; }
-h1, h2, h3 { line-height: 1.2; letter-spacing: -.035em; }
-h2 { font-size: clamp(1.75rem, 3vw, 2.35rem); margin-bottom: 1.2rem; }
-h3 { font-size: 1.35rem; }
-button, input, select { font: inherit; }
-:focus-visible { outline: 3px solid #a76ee5; outline-offset: 4px; }
-[id] { scroll-margin-block-start: 1.5rem; }
-.content { width: min(88%, 1264px); margin-inline: auto; }
-.skip-link { position: fixed; z-index: 5; left: 1rem; top: .5rem; padding: .6rem 1rem; background: white; transform: translateY(-150%); }
-.skip-link:focus { transform: translateY(0); }
-.header { background: white; }
-.header-inner { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.brand { font-weight: 800; letter-spacing: -.04em; white-space: nowrap; }
-.header nav { display: flex; flex-wrap: wrap; column-gap: clamp(.8rem, 3.8vw, 3.2rem); row-gap: .2rem; font-size: .92rem; font-weight: 700; }
-.header nav a:hover, summary:hover { text-decoration: underline; }
-.hero { background: var(--forest); color: white; position: relative; isolation: isolate; overflow: hidden; }
-.hero-content { position: relative; padding-block: clamp(3rem, 6vw, 5.25rem); }
-.hero-label { color: var(--lime); font-size: .92rem; font-weight: 750; margin-bottom: 1rem; }
-.hero h1 { font-size: clamp(2.6rem, 6vw, 5rem); line-height: 1.16; }
-.hero-description { margin-top: 1.35rem; color: #eef2ed; }
-.actions { display: flex; gap: .65rem; flex-wrap: wrap; margin-top: 1.55rem; }
-.button {
-  display: inline-flex;
+* {
+  box-sizing: border-box;
+}
+body,
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+a {
+  touch-action: manipulation;
+}
+:focus-visible {
+  outline: 3px solid #2c8d93;
+  outline-offset: 3px;
+}
+.skip {
+  position: absolute;
+  top: -80px;
+  left: 12px;
+  z-index: 10;
+  background: white;
+  padding: 8px;
+}
+.skip:focus {
+  top: 4px;
+}
+.wrap {
+  width: min(88%, 1240px);
+  margin-inline: auto;
+}
+header {
+  background: #fff;
+}
+.navbar,
+.wordmark,
+nav,
+.actions {
+  display: flex;
   align-items: center;
+}
+.navbar {
+  min-height: 76px;
+  gap: 32px;
   justify-content: space-between;
-  gap: 1rem;
+}
+.wordmark {
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 850;
+}
+.wordmark small {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+.mark {
+  color: #216e75;
+  font-size: 29px;
+}
+nav {
+  gap: clamp(15px, 3vw, 48px);
+  font-weight: 650;
+}
+.account {
+  font-size: 14px;
+  padding: 7px 16px;
+  border: 1px solid #ccd6db;
+  border-radius: 30px;
+  background: white;
+  color: var(--navy);
+}
+.hero {
+  color: white;
+  background:
+    linear-gradient(90deg, #081625c9, transparent 85%),
+    url('/art/winter-light.jpg') center 58% / cover;
+}
+.hero-copy {
+  padding-block: clamp(62px, 8vw, 115px);
+}
+.hero p {
+  color: #ceece8;
+  font-weight: 700;
+}
+.hero h1 {
+  font-size: clamp(46px, 6vw, 88px);
+  letter-spacing: -0.055em;
+  line-height: 1.15;
+  margin: 20px 0 32px;
+}
+.button,
+button {
   border: 0;
-  border-radius: .55rem;
-  padding: .65rem .95rem;
-  background: var(--lime);
-  color: #152a21;
-  font-weight: 750;
+  border-radius: 7px;
+  background: var(--navy);
+  color: white;
+  padding: 12px 20px;
+  font-weight: 700;
   cursor: pointer;
 }
-.button:hover { filter: brightness(.94); }
-.button:disabled { cursor: wait; }
-.button.secondary { background: var(--mint); }
-.contours { position: relative; height: 205px; overflow: hidden; isolation: isolate; }
-.contours.light { background: linear-gradient(126deg, #39245e, #8d5db9 57%, #ca9df3); --ring-color: #efdfff; }
-.contours.snow { background: linear-gradient(126deg, #102a2c, #287578 61%, #a1dbd5); --ring-color: #e0f78b; }
-.contours i {
-  position: absolute;
-  top: calc(17% - var(--ring) * 1%);
-  left: calc(33% - var(--ring) * 2.2%);
-  width: calc(35% + var(--ring) * 5.2%);
-  height: calc(35% + var(--ring) * 9%);
-  transform: rotate(-23deg);
-  border: 1px solid var(--ring-color);
-  border-radius: 50%;
-  opacity: .33;
+.button {
+  display: inline-flex;
+  gap: 26px;
+  align-items: center;
 }
-.hero > .contours { position: absolute; z-index: -1; inset: 0 0 0 51%; height: 100%; }
-.section { padding-top: clamp(2.9rem, 5.5vw, 4.75rem); }
-.experience-grid, .visit-grid, .booking, .field-grid { display: grid; gap: 1rem; }
-.experience-grid, .booking, .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.visit-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.experience, .info, .form-box { background: white; border-radius: .8rem; overflow: hidden; }
-.card-body { padding: 1.12rem; }
-.card-body p { color: var(--muted); margin-top: .45rem; }
-details { margin-top: .65rem; }
-summary { color: var(--forest); font-weight: 700; font-size: .88rem; cursor: pointer; }
-.booking { align-items: start; padding-bottom: clamp(3.75rem, 7vw, 6rem); }
-.booking p + p { margin-top: .55rem; }
-.form-box { padding: clamp(1rem, 3vw, 1.9rem); }
-.form-box p { margin-top: .6rem; }
-.form-box .button { margin-top: 1rem; }
-fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
-legend { padding: 0; margin-bottom: .85rem; font-size: 1.2rem; font-weight: 750; }
-.field { display: grid; gap: .3rem; min-width: 0; }
-label { font-size: .88rem; font-weight: 700; }
-input, select { width: 100%; min-width: 0; padding: .55rem; border: 1px solid #8b9a91; border-radius: .4rem; background: white; color: inherit; }
-.muted { color: var(--muted); }
-.error { color: #962d24; }
-code { overflow-wrap: anywhere; }
-footer { background: #0e231e; color: #eef2ed; }
-.footer-inner { padding-block: 1.8rem; }
-.footer-inner .brand { color: var(--lime); }
-.footer-inner p { margin-top: .3rem; font-size: .86rem; }
+.frost,
+.quiet,
+.summary {
+  background: var(--ice);
+  color: #123437;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.quick,
+.cards,
+.info-grid,
+.booking-layout,
+.pair {
+  display: grid;
+  gap: 16px;
+}
+.quick {
+  position: relative;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: -22px;
+  box-shadow: 0 8px 30px #10233312;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.quick a {
+  padding: 22px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  border-right: 1px solid #e2e8eb;
+}
+.quick span,
+.text-link {
+  color: #256b70;
+}
+.block {
+  padding-top: 60px;
+}
+.block:last-child {
+  padding-bottom: 72px;
+}
+h2 {
+  font-size: clamp(26px, 3vw, 39px);
+  letter-spacing: -0.045em;
+  line-height: 1.25;
+  margin-bottom: 24px;
+}
+h3 {
+  font-size: 22px;
+  letter-spacing: -0.045em;
+}
+.cards,
+.pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.experience,
+.info-grid article,
+.panel {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.experience > div:last-child,
+.info-grid article {
+  padding: 22px;
+}
+.experience p,
+.info-grid p,
+.panel p {
+  color: var(--muted);
+  margin: 8px 0 13px;
+}
+.experience a {
+  font-weight: 700;
+  color: #216e75;
+}
+.scene {
+  height: 180px;
+}
+.card-0 .scene {
+  background:
+    repeating-linear-gradient(
+      112deg,
+      transparent 0 20px,
+      #d2bbff40 21px 22px,
+      transparent 25px 40px
+    ),
+    linear-gradient(120deg, #251c52, #774bad 50%, #a7eee0);
+}
+.card-1 .scene {
+  background: url('/art/winter-light.jpg') center 85% / cover;
+}
+.info-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+.inside {
+  min-height: 66vh;
+  padding-block: 56px;
+}
+.panel {
+  padding: clamp(22px, 4vw, 48px);
+}
+.booking-layout {
+  grid-template-columns: 1.6fr 1fr;
+  align-items: start;
+}
+.summary {
+  background: #e5f1ef;
+}
+.summary strong {
+  font-size: 23px;
+}
+hr {
+  border: 0;
+  border-top: 1px solid #bfcecd;
+  margin: 22px 0;
+}
+.login {
+  max-width: 630px;
+}
+.kakao {
+  background: #fee500;
+  color: #231b09;
+}
+.login a {
+  margin: 12px 12px 0 0;
+}
+.text-link {
+  display: inline-block;
+}
+.notice {
+  background: #fff0d3;
+  color: #713c02 !important;
+  padding: 12px;
+  border-radius: 6px;
+}
+fieldset {
+  padding: 0;
+  border: 0;
+  margin: 18px 0 0;
+  min-width: 0;
+}
+label {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 13px;
+  font-size: 14px;
+  font-weight: 650;
+}
+input,
+select {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid #9eafb9;
+  border-radius: 6px;
+  padding: 10px;
+  background: white;
+  color: inherit;
+}
+.order {
+  padding: 18px 0;
+  border-top: 1px solid #dbe1e5;
+}
+.order b {
+  margin-left: 16px;
+  color: #216e75;
+}
+.order small {
+  overflow-wrap: anywhere;
+}
+.actions {
+  gap: 10px;
+  margin-top: 14px;
+}
+.actions:empty {
+  display: none;
+}
+footer {
+  background: var(--navy);
+  color: white;
+  padding: 30px 0;
+}
+footer p {
+  font-size: 14px;
+  color: #d1dfe7;
+}
+footer a {
+  font-size: 13px;
+  color: var(--ice);
+}
 @media (max-width: 700px) {
-  .header-inner { flex-direction: column; align-items: flex-start; justify-content: center; gap: .2rem; padding-block: .7rem; }
-  .hero > .contours { left: 0; opacity: .45; }
-  .hero-content { padding-block: 3.25rem; }
-  .experience-grid, .visit-grid, .booking { grid-template-columns: 1fr; }
-  .contours { height: 138px; }
+  .wrap {
+    width: 90%;
+  }
+  .navbar {
+    flex-wrap: wrap;
+    gap: 0;
+    min-height: 88px;
+    padding-block: 7px;
+  }
+  .wordmark {
+    font-size: 20px;
+  }
+  nav {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+  .account {
+    padding: 4px 12px;
+  }
+  .hero-copy {
+    padding-block: 52px 68px;
+  }
+  .cards,
+  .info-grid,
+  .booking-layout {
+    grid-template-columns: 1fr;
+  }
+  .quick {
+    grid-template-columns: 1fr 1fr;
+  }
+  .quick a {
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid #e2e8eb;
+  }
+  .block {
+    padding-top: 36px;
+  }
+  .scene {
+    height: 142px;
+  }
+  .inside {
+    padding-block: 24px;
+  }
+  .panel {
+    padding: 20px;
+  }
 }

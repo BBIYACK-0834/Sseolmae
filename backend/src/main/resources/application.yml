@@ -7,3 +7,23 @@ spring:
   jackson:
     deserialization:
       accept-float-as-int: false
+  datasource:
+    url: ${DB_URL:jdbc:h2:file:./data/sseolmae}
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
+  sql:
+    init:
+      mode: always
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${COOKIE_SECURE:false}
+venue:
+  origin: ${APP_ORIGIN:http://localhost:5173}
+  kakao-id: ${KAKAO_CLIENT_ID:}
+  kakao-secret: ${KAKAO_CLIENT_SECRET:}
+  toss-client: ${TOSS_CLIENT_KEY:}
+  toss-secret: ${TOSS_SECRET_KEY:}

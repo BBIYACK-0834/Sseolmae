@@ -9,12 +9,12 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class SseolmaeApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(SseolmaeApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(SseolmaeApplication.class, args);
+  }
 
-    @Bean
-    Clock venueClock() {
-        return Clock.system(ZoneId.of("Asia/Seoul"));
-    }
+  @Bean
+  Clock venueClock() {
+    return Clock.system(ZoneId.of("Asia/Seoul"));
+  }
 }

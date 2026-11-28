@@ -1,17 +1,15 @@
 package com.sseolmae.reservation;
 
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record Reservation(
     UUID id,
-    LocalDate visitDate,
+    UUID slotId,
     TicketType ticketType,
+    OffsetDateTime startsAt,
     int adults,
     int children,
-    Status status
-) {
-    public enum Status {
-        DEMO_RECEIVED
-    }
-}
+    int amount,
+    String status,
+    OffsetDateTime expiresAt) {}

@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const proxy = { '/api': 'http://127.0.0.1:8080' }
-
+const backend = 'http://127.0.0.1:8080'
+const proxy = { '/api': backend, '/oauth2': backend, '/login/oauth2': backend }
 export default defineConfig({
   plugins: [react()],
   server: { proxy },
