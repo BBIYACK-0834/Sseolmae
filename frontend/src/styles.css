@@ -391,3 +391,14 @@ footer a {
 .day-grid small { padding:4px 0; }
 .visit-cal button:disabled { background:transparent; color:#707770; cursor:default; opacity:1; }
 .day-grid button[aria-pressed=true] { background:#17392e; color:white; }
+
+.booking-layout .visit-cal { max-width:none; background:#f7fafb; border:1px solid #dce6eb; border-radius:16px; padding:clamp(12px,3vw,24px); }
+.month-nav { border-bottom:1px solid #dce6eb; padding-bottom:12px; }
+.month-nav strong { font-size:20px; }
+.day-grid button:enabled,.month-nav button:enabled { background:#e2eff2; color:var(--navy); }
+.day-grid button[aria-pressed=true],.round-grid button[aria-pressed=true] { background:var(--navy); color:white; }
+.rounds { margin:18px 0; }
+.rounds h3 { margin:0 0 10px; font-size:17px; }
+.round-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(94px,1fr)); gap:8px; }
+.round-grid button { display:grid; gap:3px; background:#f7fafb; color:var(--navy); border:1px solid #dce6eb; border-radius:10px; padding:10px; }
+.round-grid small { font-weight:400; }

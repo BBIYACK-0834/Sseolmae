@@ -282,29 +282,16 @@ export default function ReservationForm({ session }) {
               ))}
             </select>
           </label>
-          <label>
-            방문 회차
-            <select
-              required
-              disabled={!selected || !options.length}
-              value={slot?.id || ''}
-              onChange={(e) => setSlotId(e.target.value)}
-            >
-              <option value="">
-                {!loaded
-                  ? '회차 확인 중'
-                  : !selected ? '방문일을 먼저 선택하세요'
-                  : !options.length
-                    ? '등록된 회차가 없습니다'
-                    : '회차를 선택하세요'}
-              </option>
-              {options.map((s) => (
-                <option key={s.id} disabled={s.remaining < 1} value={s.id}>
-                  {date(s.startsAt)} · 잔여 {s.remaining}석
-                </option>
-              ))}
-            </select>
-          </label>
+          <section className="rounds" aria-label="방문 회차">
+            <h3>방문 회차</h3>
+            {options.length ? <div className="round-grid">{options.map(s =>
+              <button type="button" key={s.id} disabled={s.remaining < 1}
+                aria-pressed={slotId === s.id} onClick={() => setSlotId(s.id)}>
+                <strong>{new Intl.DateTimeFormat('ko-KR', {timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(s.startsAt))}</strong>
+                <small>{s.remaining ? '잔여 ' + s.remaining + '석' : '매진'}</small>
+              </button>
+            )}</div> : <p role="status">{!loaded ? '회차 확인 중' : selected ? '이 이용권에 등록된 회차가 없습니다.' : '달력에서 방문일을 선택해 주세요.'}</p>}
+          </section>
           <div className="pair">
             <label>
               성인
