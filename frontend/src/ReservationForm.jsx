@@ -184,16 +184,18 @@ export function PaymentReturn({ session, result, finish }) {
   )
 }
 
-export default function ReservationForm({ session }) {
+export default function ReservationForm({ session, initialType }) {
   const [slots, setSlots] = useState([])
-  const [type, setType] = useState('MEDIA_ART')
+  const [type, setType] = useState(initialType)
   const [day, setDay] = useState('')
   const [slotId, setSlotId] = useState('')
-  const [adults, setAdults] = useState('1')
-  const [children, setChildren] = useState('0')
+  const [adults, setAdults] = useState(0)
+  const [children, setChildren] = useState(0)
   const [loaded, setLoaded] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const details = useRef(null)
+  const drag = useRef(null)
   const submitting = useRef(false)
   const [refresh, setRefresh] = useState(0)
   useEffect(() => {
@@ -266,6 +268,22 @@ export default function ReservationForm({ session }) {
         <fieldset disabled={busy}>
           <VisitCalendar days={days} selected={selected} onSelect={value => { setDay(value); setSlotId('') }} />
           {loaded && !days.length && <p role="status">현재 예매 가능한 날짜가 없습니다.</p>}
+          <section className="booking-details" ref={details}>
+            <button type="button" className="sheet-grip" aria-label="인원 및 회차 입력 영역으로 이동"
+              onPointerDown={e => { drag.current = { y: e.clientY, top: window.scrollY }; e.currentTarget.setPointerCapture(e.pointerId) }}
+              onPointerMove={e => { if (drag.current) window.scrollTo(0, drag.current.top + drag.current.y - e.clientY) }}
+              onPointerUp={e => { const moved = drag.current && Math.abs(e.clientY - drag.current.y) > 6; drag.current = null; if (!moved) details.current.scrollIntoView({block:'start'}) }}
+              onPointerCancel={() => { drag.current = null }}
+              onClick={e => { if (e.detail === 0) details.current.scrollIntoView({block:'start'}) }}>
+              <span aria-hidden="true" />
+            </button>
+            <h3>인원 선택</h3>
+            {[['성인', adults, setAdults], ['어린이', children, setChildren]].map(([name, value, change]) =>
+              <div className="guest-row" key={name}><strong>{name}</strong><div className="stepper">
+                <button type="button" aria-label={name+' 한 명 줄이기'} disabled={!value} onClick={() => change(value-1)}>−</button>
+                <output aria-label={name+' 인원'}>{value}</output>
+                <button type="button" aria-label={name+' 한 명 추가'} disabled={count >= Math.min(20, slot?.remaining ?? 20)} onClick={() => change(value+1)}>+</button>
+              </div></div>)}
           <label>
             이용권
             <select
@@ -292,37 +310,15 @@ export default function ReservationForm({ session }) {
               </button>
             )}</div> : <p role="status">{!loaded ? '회차 확인 중' : selected ? '이 이용권에 등록된 회차가 없습니다.' : '달력에서 방문일을 선택해 주세요.'}</p>}
           </section>
-          <div className="pair">
-            <label>
-              성인
-              <input
-                type="number"
-                min="0"
-                max="20"
-                required
-                value={adults}
-                onChange={(e) => setAdults(e.target.value)}
-              />
-            </label>
-            <label>
-              어린이
-              <input
-                type="number"
-                min="0"
-                max="20"
-                required
-                value={children}
-                onChange={(e) => setChildren(e.target.value)}
-              />
-            </label>
-          </div>
           {error && (
             <p role="alert" className="notice">
               {error} <a href="#mine">내 예약 보기 →</a>
             </p>
           )}
+          <div className="booking-total"><span>총 {count}명</span><strong>{slot ? won(slot.price * count) : '회차 선택 후 금액 표시'}</strong></div>
+          {session.userId && !session.clientKey && <p className="notice">결제 서비스 준비 중입니다.</p>}
           {session.userId ? (
-            <button disabled={!slot || slot.remaining < count || !session.clientKey || busy}>
+            <button disabled={!count || !slot || slot.remaining < count || !session.clientKey || busy}>
               {busy ? '예약 처리 중…' : '예약하고 결제하기'}
             </button>
           ) : (
@@ -330,23 +326,10 @@ export default function ReservationForm({ session }) {
               로그인하고 예매하기
             </a>
           )}
+          </section>
         </fieldset>
       </form>
-      <aside className="panel summary">
-        <h3>예매 요약</h3>
-        <p>{labels[type]}</p>
-        <p>
-          {slot ? date(slot.startsAt) : selected ? selected + ' · 회차 선택 대기' : '방문일 선택 대기'} · {count}명
-        </p>
-        <hr />
-        <strong>
-          {slot ? won(slot.price * count) : '회차 선택 후 금액 표시'}
-        </strong>
-        <p>예약 후 10분 안에 결제를 완료해 주세요.</p>
-        {session.userId && !session.clientKey && (
-          <p className="notice">결제 서비스 준비 중입니다.</p>
-        )}
-      </aside>
+
     </section>
   )
 }

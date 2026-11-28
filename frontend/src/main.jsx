@@ -9,7 +9,8 @@ import ReservationForm, {
 import './styles.css'
 
 const navigation = [
-  ['experiences', '즐길 거리'],
+  ['media-art', '미디어아트'],
+  ['snow-sled', '눈썰매장'],
   ['visit', '방문 안내'],
   ['booking', '이용권 예매'],
   ['mine', '내 예약'],
@@ -61,6 +62,7 @@ function App() {
       document.getElementById(route)?.scrollIntoView()
     else window.scrollTo(0, 0)
   }, [route])
+  const category = features.find(([id]) => id === route)
   const home = ['home', 'experiences', 'visit'].includes(route)
   async function logout() {
     try {
@@ -156,7 +158,7 @@ function App() {
                       <div>
                         <h3>{item?.title || fallback}</h3>
                         <p>{item?.description || desc}</p>
-                        <a href="#booking">회차 확인 →</a>
+                        <a href={'#' + id}>{fallback} 자세히 보기 →</a>
                       </div>
                     </article>
                   )
@@ -185,6 +187,15 @@ function App() {
               </div>
             </section>
           </>
+        ) : category ? (
+          <section className="wrap inside">
+            <article className={'experience category-page card-' + features.indexOf(category)}>
+              <div className="scene" aria-hidden="true" />
+              <div><h1>{category[1]}</h1><p>{category[2]}</p>
+                <a className="button" href={'#booking-' + category[0]}>{category[1]} 이용권 예매</a>
+              </div>
+            </article>
+          </section>
         ) : (
           <div className="wrap inside">
             {!session ? (
@@ -212,7 +223,7 @@ function App() {
                 <Login session={session} />
               )
             ) : (
-              <ReservationForm session={session} />
+              <ReservationForm key={route} session={session} initialType={route === 'booking-snow-sled' ? 'SNOW_SLED' : 'MEDIA_ART'} />
             )}
           </div>
         )}
