@@ -29,6 +29,7 @@ public class SecurityConfig {
   @Bean
   SecurityFilterChain security(HttpSecurity http, SocialProviders providers,
       @Value("${venue.origin}") String origin) throws Exception {
+    http.addFilterBefore(new AuthRequestLimit(), org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
     http.authorizeHttpRequests(auth -> auth
         .requestMatchers("/api/session", "/api/experiences", "/api/slots", "/api/auth/register", "/error").permitAll()
         .anyRequest().authenticated())

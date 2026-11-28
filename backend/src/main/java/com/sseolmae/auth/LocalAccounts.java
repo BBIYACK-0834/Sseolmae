@@ -29,7 +29,7 @@ public class LocalAccounts implements UserDetailsService {
       db.update("INSERT INTO local_credential(user_id,email,password_hash) VALUES(?,?,?)",
         id,normalized(email),encoder.encode(password));
     } catch (DuplicateKeyException e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT,"이 이메일로 가입할 수 없습니다.");
+      org.springframework.transaction.interceptor.TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
     }
   }
 

@@ -107,9 +107,9 @@ function App() {
               로그아웃
             </button>
           ) : (
-            <a className="account" href="#login">
+            <div className="auth-links"><a href="#signup">회원가입</a><a className="account" href="#login">
               로그인
-            </a>
+            </a></div>
           )}
         </div>
       </header>
@@ -217,11 +217,11 @@ function App() {
               />
             ) : route === 'mine' ? (
               <MyBookings session={session} />
-            ) : route === 'login' ? (
+            ) : ['login','signup','login-after-signup'].includes(route) ? (
               session.userId ? (
                 <MyBookings session={session} />
               ) : (
-                <Login session={session} />
+                <Login key={route} session={session} signup={route === 'signup'} />
               )
             ) : (
               <ReservationForm key={route} session={session} initialType={route === 'booking-snow-sled' ? 'SNOW_SLED' : 'MEDIA_ART'} />
