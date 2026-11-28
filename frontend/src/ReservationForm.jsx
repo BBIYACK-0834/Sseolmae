@@ -26,6 +26,8 @@ const date = (value) =>
 
 async function checkout(session, booking) {
   if (!session.clientKey) throw new Error('결제 판매 개시 전입니다.')
+  if (booking.status !== 'PENDING' || Date.parse(booking.expiresAt) <= Date.now())
+    throw new Error('결제 가능한 시간이 지났거나 처리 중인 예약입니다. 내 예약을 확인해 주세요.')
   const toss = await loadTossPayments(session.clientKey)
   await toss.payment({ customerKey: session.userId }).requestPayment({
     method: 'CARD',
@@ -134,15 +136,21 @@ export function PaymentReturn({ session, result, finish }) {
   )
   const [ready, setReady] = useState(false)
   const [retry, setRetry] = useState(0)
+  const [canRetry, setCanRetry] = useState(false)
   useEffect(() => {
     if (!session.userId) return
+    if (!result.failed && (!result.approval?.paymentKey || !result.approval.orderId || !Number.isSafeInteger(result.approval.amount) || result.approval.amount < 1)) {
+      setMessage('결제 복귀 정보가 누락되었습니다. 내 예약에서 상태를 확인해 주세요.')
+      return
+    }
     if (result.failed) {
       setMessage(
-        '결제가 완료되지 않았습니다. 내 예약에서 결제를 다시 진행할 수 있습니다.',
+        '결제창에서 돌아왔습니다. 내 예약에서 현재 상태와 결제 가능 시간을 확인해 주세요.',
       )
       return
     }
     let active = true
+    setCanRetry(false)
     request('/payments/confirm', {
       method: 'POST',
       csrf: session.csrf,
@@ -161,7 +169,10 @@ export function PaymentReturn({ session, result, finish }) {
         }
       })
       .catch((e) => {
-        if (active) setMessage(e.message)
+        if (active) {
+          setMessage(e.message)
+          setCanRetry(!e.status || e.status >= 500 || e.status === 429)
+        }
       })
     return () => {
       active = false
@@ -173,7 +184,7 @@ export function PaymentReturn({ session, result, finish }) {
       <h2>{ready ? '예약이 확정되었습니다' : '결제 결과'}</h2>
       <p role="status">{message}</p>
       <div className="actions">
-        {!ready && !result.failed && (
+        {!ready && canRetry && (
           <button onClick={() => setRetry((v) => v + 1)}>승인 다시 확인</button>
         )}
         <button className="quiet" onClick={finish}>
@@ -245,7 +256,7 @@ export default function ReservationForm({ session, initialType }) {
         },
       })
       held = true
-      sessionStorage.removeItem(storageKey)
+      if (['EXPIRED','CANCELLED','CONFIRMED'].includes(booking.status)) sessionStorage.removeItem(storageKey)
       await checkout(session, booking)
     } catch (e) {
       setError(

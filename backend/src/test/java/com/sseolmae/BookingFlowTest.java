@@ -209,4 +209,27 @@ class BookingFlowTest {
         .andExpect(jsonPath("$.status").value("CANCELLED"));
     reserve("next-buyer", payload(UUID.randomUUID()));
   }
+
+  @Autowired com.sseolmae.payment.PaymentRecovery recovery;
+
+  @Test
+  void recoveryRejectsMismatchesThenSettlesWithoutBrowser() throws Exception {
+    UUID id = reserve("offline", payload(UUID.randomUUID()));
+    String key = "offline-" + id;
+    String body = json.createObjectNode().put("orderId", id.toString()).put("paymentKey",key)
+        .put("amount",24000).toString();
+    mvc.perform(post("/api/payments/confirm").with(user("other")).with(csrf())
+        .contentType("application/json").content(body)).andExpect(status().isNotFound());
+    when(toss.confirm(id,key,24000)).thenReturn(new TossGateway.Result(key,id.toString(),24000,null,null));
+    mvc.perform(post("/api/payments/confirm").with(user("offline")).with(csrf())
+        .contentType("application/json").content(body)).andExpect(status().isBadGateway());
+    when(toss.lookup(id)).thenReturn(new TossGateway.Result(key,id.toString(),1,"DONE",OffsetDateTime.now()))
+        .thenReturn(new TossGateway.Result(key,id.toString(),24000,"DONE",OffsetDateTime.now()));
+    recovery.reconcile();
+    mvc.perform(get("/api/reservations/"+id).with(user("offline"))).andExpect(jsonPath("$.status").value("PROCESSING"));
+    db.update("UPDATE payment SET next_check_at=CURRENT_TIMESTAMP WHERE booking_id=?",id);
+    recovery.reconcile();
+    mvc.perform(get("/api/reservations/"+id).with(user("offline"))).andExpect(jsonPath("$.status").value("CONFIRMED"));
+    verify(toss,times(1)).confirm(id,key,24000);
+  }
 }

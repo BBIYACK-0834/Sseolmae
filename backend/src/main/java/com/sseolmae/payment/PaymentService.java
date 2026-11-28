@@ -46,10 +46,13 @@ public class PaymentService {
   }
 
   public Reservation confirm(UUID user, UUID id, String key, int amount) {
-    gateway.requireSetup();
+
     var booking =
         tx.execute(
             transaction -> {
+              // Serialize hold expiry and promotion with seat allocation for this slot.
+              UUID slot = bookings.get(user, id).slotId();
+              db.queryForObject("SELECT id FROM visit_slot WHERE id=? FOR UPDATE", UUID.class, slot);
               var r = locked(user, id);
               if (r.amount() != amount)
                 throw new ResponseStatusException(BAD_REQUEST, "주문 금액이 일치하지 않습니다.");
@@ -60,36 +63,53 @@ public class PaymentService {
               }
               if (!r.status().equals("PENDING"))
                 throw new ResponseStatusException(CONFLICT, "결제 가능한 예약이 아닙니다.");
-              db.update("INSERT INTO payment(booking_id,payment_key) VALUES(?,?)", id, key);
+              gateway.requireSetup();
+              try {
+                db.update("INSERT INTO payment(booking_id,payment_key) VALUES(?,?)", id, key);
+              } catch (org.springframework.dao.DuplicateKeyException duplicate) {
+                throw new ResponseStatusException(CONFLICT, "이미 사용된 결제 정보입니다.");
+              }
               db.update("UPDATE booking SET status='PROCESSING' WHERE id=?", id);
               return r;
             });
     if (booking.status().equals("CONFIRMED")) return booking;
+    gateway.requireSetup();
     TossGateway.Result result;
     try {
-      result = gateway.confirm(id, key, booking.amount());
+      result = booking.status().equals("PROCESSING") &&
+          !booking.expiresAt().isAfter(java.time.OffsetDateTime.now())
+          ? gateway.lookup(id) : gateway.confirm(id, key, booking.amount());
     } catch (RestClientException e) {
       throw new ResponseStatusException(BAD_GATEWAY, "결제 결과를 확인 중입니다. 내 예약에서 승인 확인을 다시 눌러 주세요.");
     }
-    if (result == null
-        || !id.toString().equals(result.orderId())
-        || !key.equals(result.paymentKey())
-        || result.totalAmount() != amount)
-      throw new ResponseStatusException(BAD_GATEWAY, "결제사 응답을 확인할 수 없습니다.");
-    if (result.status().equals("ABORTED")
-        || result.status().equals("EXPIRED")
-        || result.status().equals("CANCELED")) {
-      db.update("UPDATE booking SET status='CANCELLED' WHERE id=? AND status='PROCESSING'", id);
+    var resolved = apply(user, id, key, amount, result);
+    if ("CANCELLED".equals(resolved.status()))
       throw new ResponseStatusException(CONFLICT, "결제가 종료되었습니다. 다시 예약해 주세요.");
-    }
-    if (!"DONE".equals(result.status()) || result.approvedAt() == null)
-      throw new ResponseStatusException(CONFLICT, "승인이 완료되지 않았습니다. 내 예약에서 다시 확인해 주세요.");
-    return tx.execute(
-        transaction -> {
-          locked(user, id);
+    return resolved;
+  }
+
+  Reservation apply(UUID user, UUID id, String key, int amount, TossGateway.Result result) {
+    if (result == null || !id.toString().equals(result.orderId()) || !key.equals(result.paymentKey())
+        || result.totalAmount() != amount || result.status() == null)
+      throw new ResponseStatusException(BAD_GATEWAY, "결제사 응답을 확인 중입니다. 추가 결제 없이 내 예약에서 확인해 주세요.");
+    return tx.execute(transaction -> {
+      var current = locked(user, id);
+      if (!"PROCESSING".equals(current.status())) {
+        if ("CONFIRMED".equals(current.status())) return current;
+        throw new ResponseStatusException(CONFLICT, "종료된 예약입니다. 내 예약을 확인해 주세요.");
+      }
+      switch (result.status()) {
+        case "ABORTED", "EXPIRED", "CANCELED" ->
+          db.update("UPDATE booking SET status='CANCELLED' WHERE id=?", id);
+        case "DONE" -> {
+          if (result.approvedAt() == null)
+            throw new ResponseStatusException(BAD_GATEWAY, "승인 시각을 확인 중입니다.");
           db.update("UPDATE payment SET approved_at=? WHERE booking_id=?", result.approvedAt(), id);
           db.update("UPDATE booking SET status='CONFIRMED' WHERE id=?", id);
-          return bookings.get(user, id);
-        });
+        }
+        default -> throw new ResponseStatusException(CONFLICT, "승인 확인 중입니다. 추가 결제 없이 내 예약에서 확인해 주세요.");
+      }
+      return bookings.get(user, id);
+    });
   }
 }

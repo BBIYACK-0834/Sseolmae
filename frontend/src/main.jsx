@@ -37,7 +37,8 @@ function readPaymentReturn() {
     return result
   }
   const saved = sessionStorage.getItem('payment-return')
-  return saved ? JSON.parse(saved) : null
+  try { return saved ? JSON.parse(saved) : null }
+  catch { sessionStorage.removeItem('payment-return'); return null }
 }
 
 function App() {

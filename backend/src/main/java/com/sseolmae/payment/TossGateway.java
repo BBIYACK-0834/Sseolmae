@@ -30,14 +30,19 @@ public class TossGateway {
   private final String secret;
   private final RestClient client;
 
+  @org.springframework.beans.factory.annotation.Autowired
   public TossGateway(@Value("${venue.toss-secret}") String secret) {
+    this(secret, "https://api.tosspayments.com/v1/payments");
+  }
+
+  TossGateway(String secret, String baseUrl) {
     this.secret = secret;
     var http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
     var factory = new JdkClientHttpRequestFactory(http);
     factory.setReadTimeout(Duration.ofSeconds(20));
     client =
         RestClient.builder()
-            .baseUrl("https://api.tosspayments.com/v1/payments")
+            .baseUrl(baseUrl)
             .requestFactory(factory)
             .defaultHeaders(headers -> headers.setBasicAuth(secret, ""))
             .build();
@@ -46,6 +51,11 @@ public class TossGateway {
   public void requireSetup() {
     if (secret.isBlank())
       throw new ResponseStatusException(SERVICE_UNAVAILABLE, "결제 연동을 준비하고 있습니다.");
+  }
+
+  public Result lookup(UUID id) {
+    requireSetup();
+    return client.get().uri("/orders/{id}", id).retrieve().body(Result.class);
   }
 
   public Result confirm(UUID id, String key, int amount) {
@@ -60,16 +70,13 @@ public class TossGateway {
     } catch (RestClientResponseException e) {
       // A prior attempt may already have succeeded. Read the provider's authoritative order state.
       try {
-        return client.get().uri("/orders/{id}", id).retrieve().body(Result.class);
+        return lookup(id);
       } catch (RestClientResponseException lookup) {
         // Release inventory only for a definitive rejection and a missing provider order.
         if (lookup.getStatusCode().value() == 404 && e.getStatusCode().is4xxClientError()) {
           var failure = e.getResponseBodyAs(Failure.class);
-          if (failure != null
+          if (failure != null && failure.code() != null
               && java.util.Set.of(
-                      "NOT_FOUND_PAYMENT",
-                      "NOT_FOUND_PAYMENT_SESSION",
-                      "INVALID_PAYMENT_KEY",
                       "REJECT_CARD_PAYMENT",
                       "PAYMENT_EXPIRED")
                   .contains(failure.code())) {
@@ -78,6 +85,8 @@ public class TossGateway {
         }
         throw lookup;
       }
+    } catch (org.springframework.web.client.ResourceAccessException timeout) {
+      return lookup(id);
     }
   }
 }

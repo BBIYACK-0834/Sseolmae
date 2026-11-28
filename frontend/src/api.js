@@ -23,9 +23,9 @@ export async function request(
     if (path === '/auth/login' && response.status === 401) throw new Error('이메일 또는 비밀번호를 확인해 주세요.')
     if ([401, 403].includes(response.status))
       throw new Error('로그인 상태를 확인하려면 페이지를 새로고침해 주세요.')
-    throw new Error(
-      data?.detail ?? '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
-    )
+    const error = new Error(data?.detail ?? '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.')
+    error.status = response.status
+    throw error
   }
   return data
 }
