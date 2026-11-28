@@ -380,3 +380,14 @@ footer a {
 .social.naver { background: #03c75a; color: #062615; }
 .social.unavailable { color: #465461; background: #edf1f3; opacity: 1; }
 .auth-panel .hint { font-size: 14px; }
+
+.visit-cal { margin: 0 0 24px; max-width: 32rem; }
+.visit-cal h3 { margin: 0 0 12px; }
+.month-nav, .day-grid { align-items: center; text-align: center; }
+.month-nav { display:flex; justify-content:space-between; margin-bottom:12px; }
+.month-nav button, .day-grid button { padding:0; min-width:0; width:100%; min-height:40px; border-radius:8px; background:#edf5ed; color:#17392e; }
+.month-nav button { width:40px; font-size:21px; }
+.day-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; }
+.day-grid small { padding:4px 0; }
+.visit-cal button:disabled { background:transparent; color:#707770; cursor:default; opacity:1; }
+.day-grid button[aria-pressed=true] { background:#17392e; color:white; }

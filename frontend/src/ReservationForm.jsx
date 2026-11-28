@@ -1,3 +1,4 @@
+import VisitCalendar, { visitDay } from './VisitCalendar'
 import Login from './Login'
 import { useEffect, useRef, useState } from 'react'
 import { loadTossPayments } from '@tosspayments/tosspayments-sdk'
@@ -186,6 +187,7 @@ export function PaymentReturn({ session, result, finish }) {
 export default function ReservationForm({ session }) {
   const [slots, setSlots] = useState([])
   const [type, setType] = useState('MEDIA_ART')
+  const [day, setDay] = useState('')
   const [slotId, setSlotId] = useState('')
   const [adults, setAdults] = useState('1')
   const [children, setChildren] = useState('0')
@@ -206,7 +208,10 @@ export default function ReservationForm({ session }) {
       })
     return () => controller.abort()
   }, [refresh])
-  const options = slots.filter((s) => s.ticketType === type)
+  const upcoming = slots.filter(s => new Date(s.startsAt).getTime() > Date.now())
+  const days = [...new Set(upcoming.filter(s => s.remaining > 0).map(s => visitDay(s.startsAt)))].sort()
+  const selected = days.includes(day) ? day : ''
+  const options = upcoming.filter(s => s.ticketType === type && selected === visitDay(s.startsAt))
   const slot = options.find((s) => s.id === slotId)
   const count = Number(adults) + Number(children)
   async function submit(event) {
@@ -257,8 +262,10 @@ export default function ReservationForm({ session }) {
     <section className="booking-layout">
       <form className="panel" onSubmit={submit}>
         <h2>이용권 예매</h2>
-        <p>이용권과 방문 회차, 인원을 선택해 주세요.</p>
+        <p>달력에서 방문일을 고른 뒤 이용권과 회차를 선택해 주세요.</p>
         <fieldset disabled={busy}>
+          <VisitCalendar days={days} selected={selected} onSelect={value => { setDay(value); setSlotId('') }} />
+          {loaded && !days.length && <p role="status">현재 예매 가능한 날짜가 없습니다.</p>}
           <label>
             이용권
             <select
@@ -279,12 +286,14 @@ export default function ReservationForm({ session }) {
             방문 회차
             <select
               required
-              value={slotId}
+              disabled={!selected || !options.length}
+              value={slot?.id || ''}
               onChange={(e) => setSlotId(e.target.value)}
             >
               <option value="">
                 {!loaded
                   ? '회차 확인 중'
+                  : !selected ? '방문일을 먼저 선택하세요'
                   : !options.length
                     ? '등록된 회차가 없습니다'
                     : '회차를 선택하세요'}
@@ -326,7 +335,7 @@ export default function ReservationForm({ session }) {
             </p>
           )}
           {session.userId ? (
-            <button disabled={!slot || !session.clientKey || busy}>
+            <button disabled={!slot || slot.remaining < count || !session.clientKey || busy}>
               {busy ? '예약 처리 중…' : '예약하고 결제하기'}
             </button>
           ) : (
@@ -340,7 +349,7 @@ export default function ReservationForm({ session }) {
         <h3>예매 요약</h3>
         <p>{labels[type]}</p>
         <p>
-          {slot ? date(slot.startsAt) : '방문 회차 선택 대기'} · {count}명
+          {slot ? date(slot.startsAt) : selected ? selected + ' · 회차 선택 대기' : '방문일 선택 대기'} · {count}명
         </p>
         <hr />
         <strong>
