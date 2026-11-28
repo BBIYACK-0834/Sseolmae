@@ -5,7 +5,7 @@ import com.sseolmae.reservation.Reservation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.util.UUID;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,12 +23,12 @@ public class PaymentController {
   }
 
   @PostMapping("/confirm")
-  Reservation confirm(OAuth2AuthenticationToken auth, @Valid @RequestBody Approval input) {
+  Reservation confirm(Authentication auth, @Valid @RequestBody Approval input) {
     return payments.confirm(accounts.id(auth), input.orderId(), input.paymentKey(), input.amount());
   }
 
   @PostMapping("/{id}/retry")
-  Reservation retry(OAuth2AuthenticationToken auth, @PathVariable UUID id) {
+  Reservation retry(Authentication auth, @PathVariable UUID id) {
     return payments.retry(accounts.id(auth), id);
   }
 }

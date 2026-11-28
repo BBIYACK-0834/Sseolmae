@@ -4,6 +4,11 @@ CREATE TABLE IF NOT EXISTS venue_user (
     subject VARCHAR(128) NOT NULL,
     UNIQUE (provider, subject)
 );
+CREATE TABLE IF NOT EXISTS local_credential (
+    user_id UUID PRIMARY KEY REFERENCES venue_user(id),
+    email VARCHAR(254) NOT NULL UNIQUE,
+    password_hash VARCHAR(256) NOT NULL
+);
 CREATE TABLE IF NOT EXISTS visit_slot (
     id UUID PRIMARY KEY,
     ticket_type VARCHAR(20) NOT NULL CHECK (ticket_type IN ('MEDIA_ART','SNOW_SLED','COMBO')),

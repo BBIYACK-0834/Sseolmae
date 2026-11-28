@@ -1,8 +1,8 @@
+import Login from './Login'
 import { createRoot } from 'react-dom/client'
 import { useEffect, useState } from 'react'
 import { request } from './api'
 import ReservationForm, {
-  Login,
   MyBookings,
   PaymentReturn,
 } from './ReservationForm'
@@ -115,7 +115,7 @@ function App() {
           new URLSearchParams(location.search).get('login') === 'failed') && (
           <p className="notice wrap" role="alert">
             {error ||
-              '카카오 로그인을 완료하지 못했습니다. 다시 시도해 주세요.'}
+              '소셜 로그인을 완료하지 못했습니다. 다시 시도해 주세요.'}
           </p>
         )}
         {home ? (

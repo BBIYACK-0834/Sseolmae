@@ -1,3 +1,4 @@
+import Login from './Login'
 import { useEffect, useRef, useState } from 'react'
 import { loadTossPayments } from '@tosspayments/tosspayments-sdk'
 import { request } from './api'
@@ -33,25 +34,6 @@ async function checkout(session, booking) {
     successUrl: location.origin + '/payment/success',
     failUrl: location.origin + '/payment/fail',
   })
-}
-
-export function Login({ session }) {
-  return (
-    <section className="panel login">
-      <h2>로그인</h2>
-      <p>예약과 결제 내역을 확인하려면 카카오 계정으로 로그인하세요.</p>
-      {session.kakaoReady ? (
-        <a className="button kakao" href="/oauth2/authorization/kakao">
-          카카오로 계속하기
-        </a>
-      ) : (
-        <p className="notice">카카오 로그인 연동 준비 중입니다.</p>
-      )}
-      <a className="text-link" href="#home">
-        홈으로 →
-      </a>
-    </section>
-  )
 }
 
 export function MyBookings({ session }) {

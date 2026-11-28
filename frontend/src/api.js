@@ -9,10 +9,10 @@ export async function request(
       signal,
       credentials: 'same-origin',
       headers: {
-        ...(body ? { 'Content-Type': 'application/json' } : {}),
+        ...(body ? { 'Content-Type': body instanceof URLSearchParams ? 'application/x-www-form-urlencoded' : 'application/json' } : {}),
         ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {}),
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof URLSearchParams ? body : body ? JSON.stringify(body) : undefined,
     })
   } catch (error) {
     if (error.name === 'AbortError') throw error
@@ -20,6 +20,7 @@ export async function request(
   }
   const data = await response.json().catch(() => null)
   if (!response.ok) {
+    if (path === '/auth/login' && response.status === 401) throw new Error('이메일 또는 비밀번호를 확인해 주세요.')
     if ([401, 403].includes(response.status))
       throw new Error('로그인 상태를 확인하려면 페이지를 새로고침해 주세요.')
     throw new Error(

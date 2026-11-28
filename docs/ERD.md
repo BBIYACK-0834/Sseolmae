@@ -4,6 +4,7 @@
 
 ```mermaid
 erDiagram
+    VENUE_USER ||--o| LOCAL_CREDENTIAL : authenticates
     VENUE_USER ||--o{ BOOKING : places
     VISIT_SLOT ||--o{ BOOKING : reserves
     BOOKING ||--o| PAYMENT : authorizes
@@ -12,6 +13,11 @@ erDiagram
         uuid id PK
         varchar provider
         varchar subject
+    }
+    LOCAL_CREDENTIAL {
+        uuid user_id PK,FK
+        varchar email UK
+        varchar password_hash
     }
     VISIT_SLOT {
         uuid id PK
@@ -40,7 +46,8 @@ erDiagram
 
 | 테이블 | 관계 및 제약 |
 | --- | --- |
-| VENUE_USER | 카카오의 서비스 사용자 ID를 subject에 저장. provider와 subject 조합은 고유 |
+| VENUE_USER | 기본 회원은 내부 UUID, 소셜 회원은 제공자의 고유 ID를 subject에 저장. provider와 subject 조합은 고유 |
+| LOCAL_CREDENTIAL | 기본 로그인 회원의 이메일과 비밀번호 해시. 이메일 고유 제약 |
 | VISIT_SLOT | 이용권 종류와 시작 시각 조합은 고유. 정원과 원화 단가는 양수 |
 | BOOKING | 회원과 회차를 참조. 회원별 request_id가 같은 요청의 중복 예약을 방지. 예약 시점의 합계 금액을 보관 |
 | PAYMENT | 예약당 승인 시도 한 건. 결제 키 중복 방지. 승인 시각은 결제사 확인 전까지 비어 있음 |

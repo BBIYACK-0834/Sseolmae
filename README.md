@@ -1,10 +1,10 @@
 # 설매 · 미디어아트와 눈썰매장
 
-React 방문자 사이트와 Java 21 Spring Boot 예약 서버입니다. 카카오 로그인 후 잔여석이 있는 회차를 선택하면 서버가 좌석을 확보하고, 토스페이먼츠 승인 완료 시 예약을 확정합니다.
+React 방문자 사이트와 Java 21 Spring Boot 예약 서버입니다. 이메일 또는 소셜 로그인 후 잔여석이 있는 회차를 선택하면 서버가 좌석을 확보하고, 토스페이먼츠 승인 완료 시 예약을 확정합니다.
 
 **[개발 ERD 열기](docs/ERD.md)** · **[테이블 생성 SQL](backend/src/main/resources/schema.sql)** · **[Figma 디자인](https://www.figma.com/design/tXGsN96m8NMhqJzDSGVx4t/?node-id=3-32)**
 
-Figma에서 [카카오 로그인](https://www.figma.com/design/tXGsN96m8NMhqJzDSGVx4t/?node-id=20-105), [예매](https://www.figma.com/design/tXGsN96m8NMhqJzDSGVx4t/?node-id=4-907), [결제 결과](https://www.figma.com/design/tXGsN96m8NMhqJzDSGVx4t/?node-id=4-955), [내 예약](https://www.figma.com/design/tXGsN96m8NMhqJzDSGVx4t/?node-id=20-227)을 확인할 수 있습니다. Figma의 회차·금액·결제 결과는 예시 데이터입니다.
+Figma에서 [로그인](https://www.figma.com/design/tXGsN96m8NMhqJzDSGVx4t/?node-id=20-105), [예매](https://www.figma.com/design/tXGsN96m8NMhqJzDSGVx4t/?node-id=4-907), [결제 결과](https://www.figma.com/design/tXGsN96m8NMhqJzDSGVx4t/?node-id=4-955), [내 예약](https://www.figma.com/design/tXGsN96m8NMhqJzDSGVx4t/?node-id=20-227)을 확인할 수 있습니다. Figma의 회차·금액·결제 결과는 예시 데이터입니다.
 
 ## 로컬 실행
 
@@ -21,16 +21,24 @@ npm ci
 npm run dev
 ```
 
-브라우저에서 http://localhost:5173 을 엽니다. 프론트와 백엔드 요청은 Vite 프록시를 통해 같은 출처로 처리합니다. 안내와 회차 목록은 외부 키 없이 확인할 수 있습니다. 로그인과 결제는 아래 환경변수를 백엔드 프로세스에 설정한 후 서버를 재시작하면 활성화됩니다. 프론트 개발 서버 주소와 카카오에 등록한 주소에서 localhost 표기를 통일하세요.
+브라우저에서 http://localhost:5173 을 엽니다. 프론트와 백엔드 요청은 Vite 프록시를 통해 같은 출처로 처리합니다. 안내와 회차 목록은 외부 키 없이 확인할 수 있습니다. 소셜 로그인과 결제는 아래 환경변수를 백엔드 프로세스에 설정한 후 서버를 재시작하면 활성화됩니다. 프론트 개발 서버 주소와 인증 제공자에 등록한 주소에서 localhost 표기를 통일하세요.
 
-## 카카오 로그인
+## 기본 로그인과 OAuth2 로그인
 
-1. 카카오 개발자 콘솔에서 앱을 등록하고 카카오 로그인을 활성화합니다.
-2. 웹 플랫폼과 카카오 로그인 Redirect URI를 등록합니다. 로컬 콜백은 `http://localhost:5173/login/oauth2/code/kakao`입니다.
-3. REST API 키와 카카오 로그인용 Client Secret을 백엔드에 설정합니다. 이 프로젝트는 Client Secret을 사용하는 앱으로 구성합니다.
-4. 홈페이지의 **로그인 → 카카오로 계속하기**를 선택합니다. 인증 코드 교환 후 서버 세션이 생성됩니다. 첫 방문에는 카카오의 앱 범위 사용자 ID를 이용해 회원을 생성합니다.
+**기본 로그인**은 외부 키 없이 사용할 수 있습니다. 로그인 화면에서 **이메일 회원가입**을 선택하고 이메일과 비밀번호(10~128자)를 입력합니다. 가입 후 같은 이메일과 비밀번호로 로그인하면 예매를 진행할 수 있습니다. 비밀번호는 PBKDF2 해시로 저장합니다.
 
-[카카오 로그인 REST API 가이드](https://developers.kakao.com/docs/latest/ko/kakaologin/rest-api)
+**소셜 로그인**은 아래에서 사용할 제공자의 앱을 등록하고 해당 키 쌍을 서버 환경변수로 설정한 뒤 재시작합니다. 웹 앱의 승인된 리디렉션 주소는 아래 값과 정확히 일치해야 합니다. 배포 시 localhost 대신 배포 사이트의 HTTPS 주소를 사용합니다.
+
+| 제공자 | 백엔드 환경변수 | 로컬 콜백 |
+| --- | --- | --- |
+| Google (OpenID Connect) | GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET | `http://localhost:5173/login/oauth2/code/google` |
+| 카카오 | KAKAO_CLIENT_ID (REST API 키), KAKAO_CLIENT_SECRET | `http://localhost:5173/login/oauth2/code/kakao` |
+| 네이버 | NAVER_CLIENT_ID, NAVER_CLIENT_SECRET | `http://localhost:5173/login/oauth2/code/naver` |
+
+각 제공자의 앱 콘솔에서 웹 서비스 로그인을 활성화하세요. 키가 설정된 제공자의 버튼만 활성화됩니다. 회원은 제공자와 고유 ID 조합으로 구분하며 다른 로그인 방식에서 같은 이메일을 사용해도 예약 이력이 자동 통합되지 않습니다.
+
+`POST /api/auth/register`는 JSON의 email, password를 받으며 성공 시 201을 반환합니다. `POST /api/auth/login`은 폼 인코딩된 email, password를 받으며 성공 시 204와 로그인 세션을 반환합니다. 두 요청 모두 먼저 `GET /api/session`에서 받은 CSRF 토큰과 동일한 세션 쿠키가 필요합니다.
+
 
 ## 토스페이먼츠 결제
 
@@ -76,4 +84,4 @@ npm run dev
 
 - 프론트엔드: `cd frontend` 후 `npm ci && npm run build`
 - 백엔드: `cd backend` 후 `mvn clean package`
-- 통합 테스트는 임시 DB와 결제사 모의 응답을 사용합니다. 실제 카카오·토스 테스트 상점 E2E 검증에는 해당 앱 키가 필요합니다.
+- 통합 테스트는 임시 DB와 결제사 모의 응답을 사용합니다. 실제 소셜 로그인·토스 테스트 상점 E2E 검증에는 해당 앱 키가 필요합니다.

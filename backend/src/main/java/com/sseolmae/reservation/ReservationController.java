@@ -6,7 +6,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.*;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,24 +27,24 @@ public class ReservationController {
 
   @PostMapping("/reservations")
   ResponseEntity<Reservation> create(
-      OAuth2AuthenticationToken auth, @RequestBody @Valid ReservationRequest request) {
+      Authentication auth, @RequestBody @Valid ReservationRequest request) {
     var booking = bookings.create(accounts.id(auth), request);
     return ResponseEntity.created(URI.create("/api/reservations/" + booking.id())).body(booking);
   }
 
   @GetMapping("/reservations")
-  List<Reservation> mine(OAuth2AuthenticationToken auth) {
+  List<Reservation> mine(Authentication auth) {
     return bookings.list(accounts.id(auth));
   }
 
   @GetMapping("/reservations/{id}")
-  Reservation get(OAuth2AuthenticationToken auth, @PathVariable UUID id) {
+  Reservation get(Authentication auth, @PathVariable UUID id) {
     return bookings.get(accounts.id(auth), id);
   }
 
   @DeleteMapping("/reservations/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  void cancel(OAuth2AuthenticationToken auth, @PathVariable UUID id) {
+  void cancel(Authentication auth, @PathVariable UUID id) {
     bookings.cancel(accounts.id(auth), id);
   }
 }

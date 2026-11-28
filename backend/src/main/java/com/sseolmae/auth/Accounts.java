@@ -14,7 +14,8 @@ public class Accounts {
     this.db = db;
   }
 
-  public UUID id(OAuth2AuthenticationToken auth) {
+  public UUID id(org.springframework.security.core.Authentication authentication) {
+    if (!(authentication instanceof OAuth2AuthenticationToken auth)) return UUID.fromString(authentication.getName());
     String provider = auth.getAuthorizedClientRegistrationId();
     String subject = auth.getName();
     String select = "SELECT id FROM venue_user WHERE provider=? AND subject=?";

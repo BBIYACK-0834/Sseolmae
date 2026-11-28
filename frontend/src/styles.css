@@ -368,3 +368,15 @@ footer a {
     padding: 20px;
   }
 }
+
+.auth-panel { margin-inline: auto; max-width: 520px; }
+.auth-panel h3 { font-size: 18px; }
+.auth-panel .primary-auth, .auth-panel .social { width: 100%; }
+.auth-panel .auth-switch { width: 100%; background: transparent; color: var(--navy); text-decoration: underline; }
+.social-auth { border-top: 1px solid #dbe1e5; margin-top: 16px; padding-top: 20px; }
+.social-auth h3 { margin-bottom: 10px; }
+.auth-panel .social { display: block; margin: 8px 0 0; text-align: center; border-radius: 7px; }
+.social.google { background: white; color: #202124; border: 1px solid #ccd6db; }
+.social.naver { background: #03c75a; color: #062615; }
+.social.unavailable { color: #465461; background: #edf1f3; opacity: 1; }
+.auth-panel .hint { font-size: 14px; }
