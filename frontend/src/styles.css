@@ -1,0 +1,425 @@
+:root {
+  font-family: 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
+  color: #142332;
+  background: #f6f8f9;
+  line-height: 1.6;
+  --navy: #122537;
+  --ice: #c6f0ea;
+  --muted: #526474;
+}
+* {
+  box-sizing: border-box;
+}
+body,
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+a {
+  touch-action: manipulation;
+}
+:focus-visible {
+  outline: 3px solid #2c8d93;
+  outline-offset: 3px;
+}
+.skip {
+  position: absolute;
+  top: -80px;
+  left: 12px;
+  z-index: 10;
+  background: white;
+  padding: 8px;
+}
+.skip:focus {
+  top: 4px;
+}
+.wrap {
+  width: min(88%, 1240px);
+  margin-inline: auto;
+}
+header {
+  background: #fff;
+}
+.navbar,
+.wordmark,
+nav,
+.actions {
+  display: flex;
+  align-items: center;
+}
+.navbar {
+  min-height: 76px;
+  gap: 32px;
+  justify-content: space-between;
+}
+.wordmark {
+  gap: 10px;
+  font-size: 24px;
+  font-weight: 850;
+}
+.wordmark small {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+.mark {
+  color: #216e75;
+  font-size: 29px;
+}
+nav {
+  gap: clamp(15px, 3vw, 48px);
+  font-weight: 650;
+}
+.account {
+  font-size: 14px;
+  padding: 7px 16px;
+  border: 1px solid #ccd6db;
+  border-radius: 30px;
+  background: white;
+  color: var(--navy);
+}
+.hero {
+  color: white;
+  background:
+    linear-gradient(90deg, #081625c9, transparent 85%),
+    url('/art/winter-light.jpg') center 58% / cover;
+}
+.hero-copy {
+  padding-block: clamp(62px, 8vw, 115px);
+}
+.hero p {
+  color: #ceece8;
+  font-weight: 700;
+}
+.hero h1 {
+  font-size: clamp(46px, 6vw, 88px);
+  letter-spacing: -0.055em;
+  line-height: 1.15;
+  margin: 20px 0 32px;
+}
+.button,
+button {
+  border: 0;
+  border-radius: 7px;
+  background: var(--navy);
+  color: white;
+  padding: 12px 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.button {
+  display: inline-flex;
+  gap: 26px;
+  align-items: center;
+}
+.frost,
+.quiet,
+.summary {
+  background: var(--ice);
+  color: #123437;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.quick,
+.cards,
+.info-grid,
+.booking-layout,
+.pair {
+  display: grid;
+  gap: 16px;
+}
+.quick {
+  position: relative;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: -22px;
+  box-shadow: 0 8px 30px #10233312;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.quick a {
+  padding: 22px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  border-right: 1px solid #e2e8eb;
+}
+.quick span,
+.text-link {
+  color: #256b70;
+}
+.block {
+  padding-top: 60px;
+}
+.block:last-child {
+  padding-bottom: 72px;
+}
+h2 {
+  font-size: clamp(26px, 3vw, 39px);
+  letter-spacing: -0.045em;
+  line-height: 1.25;
+  margin-bottom: 24px;
+}
+h3 {
+  font-size: 22px;
+  letter-spacing: -0.045em;
+}
+.cards,
+.pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.experience,
+.info-grid article,
+.panel {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.experience > div:last-child,
+.info-grid article {
+  padding: 22px;
+}
+.experience p,
+.info-grid p,
+.panel p {
+  color: var(--muted);
+  margin: 8px 0 13px;
+}
+.experience a {
+  font-weight: 700;
+  color: #216e75;
+}
+.scene {
+  height: 180px;
+}
+.card-0 .scene {
+  background:
+    repeating-linear-gradient(
+      112deg,
+      transparent 0 20px,
+      #d2bbff40 21px 22px,
+      transparent 25px 40px
+    ),
+    linear-gradient(120deg, #251c52, #774bad 50%, #a7eee0);
+}
+.card-1 .scene {
+  background: url('/art/winter-light.jpg') center 85% / cover;
+}
+.info-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+.inside {
+  min-height: 66vh;
+  padding-block: 56px;
+}
+.panel {
+  padding: clamp(22px, 4vw, 48px);
+}
+.booking-layout {
+  grid-template-columns: 1.6fr 1fr;
+  align-items: start;
+}
+.summary {
+  background: #e5f1ef;
+}
+.summary strong {
+  font-size: 23px;
+}
+hr {
+  border: 0;
+  border-top: 1px solid #bfcecd;
+  margin: 22px 0;
+}
+.login {
+  max-width: 630px;
+}
+.kakao {
+  background: #fee500;
+  color: #231b09;
+}
+.login a {
+  margin: 12px 12px 0 0;
+}
+.text-link {
+  display: inline-block;
+}
+.notice {
+  background: #fff0d3;
+  color: #713c02 !important;
+  padding: 12px;
+  border-radius: 6px;
+}
+fieldset {
+  padding: 0;
+  border: 0;
+  margin: 18px 0 0;
+  min-width: 0;
+}
+label {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 13px;
+  font-size: 14px;
+  font-weight: 650;
+}
+input,
+select {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid #9eafb9;
+  border-radius: 6px;
+  padding: 10px;
+  background: white;
+  color: inherit;
+}
+.order {
+  padding: 18px 0;
+  border-top: 1px solid #dbe1e5;
+}
+.order b {
+  margin-left: 16px;
+  color: #216e75;
+}
+.order small {
+  overflow-wrap: anywhere;
+}
+.actions {
+  gap: 10px;
+  margin-top: 14px;
+}
+.actions:empty {
+  display: none;
+}
+footer {
+  background: var(--navy);
+  color: white;
+  padding: 30px 0;
+}
+footer p {
+  font-size: 14px;
+  color: #d1dfe7;
+}
+footer a {
+  font-size: 13px;
+  color: var(--ice);
+}
+@media (max-width: 700px) {
+  .wrap {
+    width: 90%;
+  }
+  .navbar {
+    flex-wrap: wrap;
+    gap: 0;
+    min-height: 88px;
+    padding-block: 7px;
+  }
+  .wordmark {
+    font-size: 20px;
+  }
+  nav {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+  .account {
+    padding: 4px 12px;
+  }
+  .hero-copy {
+    padding-block: 52px 68px;
+  }
+  .cards,
+  .info-grid,
+  .booking-layout {
+    grid-template-columns: 1fr;
+  }
+  .quick {
+    grid-template-columns: 1fr 1fr;
+  }
+  .quick a {
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid #e2e8eb;
+  }
+  .block {
+    padding-top: 36px;
+  }
+  .scene {
+    height: 142px;
+  }
+  .inside {
+    padding-block: 24px;
+  }
+  .panel {
+    padding: 20px;
+  }
+}
+
+.auth-panel { margin-inline: auto; max-width: 520px; }
+.auth-panel h3 { font-size: 18px; }
+.auth-panel .primary-auth, .auth-panel .social { width: 100%; }
+.auth-panel .auth-switch { width: 100%; background: transparent; color: var(--navy); text-decoration: underline; }
+.social-auth { border-top: 1px solid #dbe1e5; margin-top: 16px; padding-top: 20px; }
+.social-auth h3 { margin-bottom: 10px; }
+.auth-panel .social { display: block; margin: 8px 0 0; text-align: center; border-radius: 7px; }
+.social.google { background: white; color: #202124; border: 1px solid #ccd6db; }
+.social.naver { background: #03c75a; color: #062615; }
+.social.unavailable { color: #465461; background: #edf1f3; opacity: 1; }
+.auth-panel .hint { font-size: 14px; }
+
+.visit-cal { margin: 0 0 24px; max-width: 32rem; }
+.visit-cal h3 { margin: 0 0 12px; }
+.month-nav, .day-grid { align-items: center; text-align: center; }
+.month-nav { display:flex; justify-content:space-between; margin-bottom:12px; }
+.month-nav button, .day-grid button { padding:0; min-width:0; width:100%; min-height:40px; border-radius:8px; background:#edf5ed; color:#17392e; }
+.month-nav button { width:40px; font-size:21px; }
+.day-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; }
+.day-grid small { padding:4px 0; }
+.visit-cal button:disabled { background:transparent; color:#707770; cursor:default; opacity:1; }
+.day-grid button[aria-pressed=true] { background:#17392e; color:white; }
+
+.booking-layout .visit-cal { max-width:none; background:#f7fafb; border:1px solid #dce6eb; border-radius:16px; padding:clamp(12px,3vw,24px); }
+.month-nav { border-bottom:1px solid #dce6eb; padding-bottom:12px; }
+.month-nav strong { font-size:20px; }
+.day-grid button:enabled,.month-nav button:enabled { background:#e2eff2; color:var(--navy); }
+.day-grid button[aria-pressed=true],.round-grid button[aria-pressed=true] { background:var(--navy); color:white; }
+.rounds { margin:18px 0; }
+.rounds h3 { margin:0 0 10px; font-size:17px; }
+.round-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(94px,1fr)); gap:8px; }
+.round-grid button { display:grid; gap:3px; background:#f7fafb; color:var(--navy); border:1px solid #dce6eb; border-radius:10px; padding:10px; }
+.round-grid small { font-weight:400; }
+
+.inside:has(.booking-layout) { width:100%; max-width:none; padding:0; }
+.booking-layout { display:block; }
+.booking-layout > .panel { border-radius:0; padding:clamp(20px,4vw,60px) max(5vw,calc((100vw - 1240px)/2)); }
+.booking-layout .visit-cal { margin:0; }
+.booking-details { padding:0 0 24px; scroll-margin-top:96px; }
+.booking-details h3 { margin:16px 0; }
+.sheet-grip { display:grid; place-items:center; width:100%; height:44px; background:transparent; touch-action:none; cursor:grab; }
+.sheet-grip:active { cursor:grabbing; }
+.sheet-grip span { width:46px; height:5px; border-radius:6px; background:#a1afb5; }
+.guest-row,.booking-total,.stepper { display:flex; align-items:center; justify-content:space-between; }
+.guest-row { padding:10px 0; border-bottom:1px solid #dae3e5; }
+.stepper { gap:10px; }
+.stepper button { border-radius:50%; border:1px solid #c8d6da; width:42px; height:42px; padding:0; background:white; color:var(--navy); font-size:21px; }
+.stepper output { min-width:2ch; text-align:center; }
+.guest-row + label,.booking-total { margin:22px 0 14px; }
+.category-page .scene { height:clamp(180px,28vw,360px); }
+@media(max-width:700px){ .navbar nav { gap:4px; font-size:clamp(11px,3vw,14px); } }
+
+.auth-links {display:flex; align-items:center; gap:12px; font-size:14px;}
+.auth-panel .auth-switch {display:block;text-align:center;margin:10px 0;}
