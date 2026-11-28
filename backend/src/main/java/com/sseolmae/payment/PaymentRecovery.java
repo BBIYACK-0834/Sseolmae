@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class PaymentRecovery {
-  private record Pending(UUID id, UUID user, String key, int amount) {}
+  private record Pending(UUID id, UUID user, String key, int amount, boolean refund) {}
   private final JdbcTemplate db;
   private final TossGateway gateway;
   private final PaymentService payments;
@@ -25,15 +25,16 @@ public class PaymentRecovery {
   @Scheduled(initialDelay = 60000, fixedDelay = 60000)
   public void reconcile() {
     var rows = db.query("""
-        SELECT b.id,b.user_id,p.payment_key,b.amount FROM payment p JOIN booking b ON b.id=p.booking_id
-        WHERE b.status='PROCESSING' AND p.next_check_at<=CURRENT_TIMESTAMP
+        SELECT b.id,b.user_id,p.payment_key,b.amount,b.refund_requested FROM payment p JOIN booking b ON b.id=p.booking_id
+        WHERE (b.status='PROCESSING' OR (b.status='CONFIRMED' AND b.refund_requested)) AND p.next_check_at<=CURRENT_TIMESTAMP
         ORDER BY p.next_check_at LIMIT 20
-        """, (r,i) -> new Pending(r.getObject(1,UUID.class),r.getObject(2,UUID.class),r.getString(3),r.getInt(4)));
+        """, (r,i) -> new Pending(r.getObject(1,UUID.class),r.getObject(2,UUID.class),r.getString(3),r.getInt(4),r.getBoolean(5)));
     for (var row : rows) {
       if (db.update("UPDATE payment SET next_check_at=? WHERE booking_id=? AND next_check_at<=CURRENT_TIMESTAMP",
           OffsetDateTime.now().plusMinutes(5), row.id()) == 0) continue;
       try {
-        payments.apply(row.user(), row.id(), row.key(), row.amount(), gateway.lookup(row.id()));
+        if (row.refund()) payments.refund(row.user(),row.id());
+        else payments.apply(row.user(), row.id(), row.key(), row.amount(), gateway.lookup(row.id()));
       } catch (RestClientException | ResponseStatusException unresolved) {
         LoggerFactory.getLogger(PaymentRecovery.class).warn("Payment reconciliation pending for order {}", row.id());
       }

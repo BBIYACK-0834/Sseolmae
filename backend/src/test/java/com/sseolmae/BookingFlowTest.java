@@ -28,13 +28,14 @@ class BookingFlowTest {
   @Autowired ObjectMapper json;
   @Autowired JdbcTemplate db;
   @MockitoBean TossGateway toss;
+  @MockitoBean com.sseolmae.ops.Staff staff;
   private UUID slot;
 
   @BeforeEach
   void prepare() {
     slot = UUID.randomUUID();
     db.update(
-        "INSERT INTO visit_slot VALUES(?,?,?,?,?)",
+        "INSERT INTO visit_slot(id,ticket_type,starts_at,capacity,price) VALUES(?,?,?,?,?)",
         slot,
         "MEDIA_ART",
         OffsetDateTime.now().plusDays(1),
@@ -231,5 +232,33 @@ class BookingFlowTest {
     recovery.reconcile();
     mvc.perform(get("/api/reservations/"+id).with(user("offline"))).andExpect(jsonPath("$.status").value("CONFIRMED"));
     verify(toss,times(1)).confirm(id,key,24000);
+  }
+
+  @Test void staffControlsAndRefundLifecycle() throws Exception {
+    mvc.perform(get("/api/staff/slots").with(user("visitor"))).andExpect(status().isForbidden());
+    mvc.perform(get("/api/session").with(user("operator")));
+    UUID operator=db.queryForObject("SELECT id FROM venue_user WHERE subject='operator'",UUID.class);
+    when(staff.includes(operator)).thenReturn(true);
+    var terms=json.createObjectNode().put("capacity",2).put("price",15000).put("childPrice",5000).put("saleOpen",true);
+    mvc.perform(put("/api/staff/slots/"+slot).with(user("operator")).with(csrf()).contentType("application/json").content(terms.toString()))
+      .andExpect(status().isOk());
+    UUID id=reserve("family",payload(UUID.randomUUID()));
+    mvc.perform(get("/api/reservations/"+id).with(user("family"))).andExpect(jsonPath("$.amount").value(20000));
+    terms.put("capacity",1);
+    mvc.perform(put("/api/staff/slots/"+slot).with(user("operator")).with(csrf()).contentType("application/json").content(terms.toString()))
+      .andExpect(status().isConflict());
+    String key="f-"+id;
+    db.update("UPDATE booking SET status='CONFIRMED' WHERE id=?",id);
+    db.update("INSERT INTO payment(booking_id,payment_key) VALUES(?,?)",id,key);
+    when(toss.refund(id,key,20000)).thenReturn(new TossGateway.Result(key,id.toString(),20000,"CANCELED",null,"KRW",0));
+    for(int i=0;i<2;i++) mvc.perform(post("/api/payments/"+id+"/refund").with(user("family")).with(csrf()))
+      .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("CANCELLED"));
+    verify(toss,times(1)).refund(id,key,20000);
+    UUID admitted=reserve("onsite",payload(UUID.randomUUID()));
+    db.update("UPDATE booking SET status='CONFIRMED' WHERE id=?",admitted);
+    db.update("UPDATE visit_slot SET starts_at=? WHERE id=?",OffsetDateTime.now(),slot);
+    mvc.perform(post("/api/staff/reservations/"+admitted+"/admit").with(user("operator")).with(csrf())).andExpect(status().isOk());
+    mvc.perform(post("/api/staff/reservations/"+admitted+"/admit").with(user("operator")).with(csrf())).andExpect(status().isConflict());
+    mvc.perform(post("/api/payments/"+admitted+"/refund").with(user("onsite")).with(csrf())).andExpect(status().isConflict());
   }
 }

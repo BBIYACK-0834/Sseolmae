@@ -8,15 +8,17 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class SessionController {
+  private final com.sseolmae.ops.Staff staff;
   private final Accounts accounts;
   private final SocialProviders providers;
 
-  public SessionController(Accounts accounts, SocialProviders providers) {
+  public SessionController(Accounts accounts, SocialProviders providers, com.sseolmae.ops.Staff staff) {
+    this.staff = staff;
     this.accounts = accounts;
     this.providers = providers;
   }
 
-  public record Session(UUID userId, boolean kakaoReady, java.util.List<String> oauthProviders, String clientKey, String csrf) {}
+  public record Session(UUID userId, boolean kakaoReady, java.util.List<String> oauthProviders, String clientKey, String csrf, boolean staff) {}
 
   @GetMapping("/api/session")
   Session session(
@@ -24,11 +26,12 @@ public class SessionController {
       CsrfToken csrf,
       @Value("${venue.toss-client}") String clientKey,
       @Value("${venue.toss-secret}") String paymentSecret) {
+    UUID user = auth == null ? null : accounts.id(auth);
     return new Session(
-        auth == null ? null : accounts.id(auth),
+        user,
         providers.enabled().contains("kakao"),
         providers.enabled(),
         paymentSecret.isBlank() ? "" : clientKey,
-        csrf.getToken());
+        csrf.getToken(), staff.includes(user));
   }
 }

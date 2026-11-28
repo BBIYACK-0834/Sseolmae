@@ -37,6 +37,38 @@ public class PaymentService {
         "SELECT payment_key FROM payment WHERE booking_id=?", String.class, id);
   }
 
+  public Reservation refund(UUID user, UUID id) {
+    var booking = tx.execute(transaction -> {
+      var r = locked(user,id);
+      if (r.refundRequested()) return r;
+      if (!"CONFIRMED".equals(r.status()) || r.admittedAt()!=null || !r.startsAt().isAfter(java.time.OffsetDateTime.now()))
+        throw new ResponseStatusException(CONFLICT,"시작 전 미입장 확정 예약만 환불할 수 있습니다.");
+      gateway.requireSetup();
+      db.update("UPDATE booking SET refund_requested=TRUE WHERE id=?",id);
+      return r;
+    });
+    if ("CANCELLED".equals(booking.status())) return booking;
+    String key = savedKey(id);
+    TossGateway.Result result;
+    try {
+      result = gateway.refund(id,key,booking.amount());
+    } catch (RestClientException uncertain) {
+      try { result = gateway.lookup(id); }
+      catch (RestClientException unavailable) {
+        throw new ResponseStatusException(BAD_GATEWAY,"환불 확인 중입니다. 내 예약에서 다시 확인해 주세요.");
+      }
+    }
+    if (result == null || !"CANCELED".equals(result.status()) || !key.equals(result.paymentKey())
+        || !id.toString().equals(result.orderId()) || result.totalAmount()!=booking.amount()
+        || !"KRW".equals(result.currency()) || !Integer.valueOf(0).equals(result.balanceAmount()))
+      throw new ResponseStatusException(CONFLICT,"환불 확인 중입니다. 내 예약에서 다시 확인해 주세요.");
+    return tx.execute(transaction -> {
+      locked(user,id);
+      db.update("UPDATE booking SET status='CANCELLED' WHERE id=? AND refund_requested=TRUE AND status='CONFIRMED'",id);
+      return bookings.get(user,id);
+    });
+  }
+
   public Reservation retry(UUID user, UUID id) {
     var r = bookings.get(user, id);
     if (r.status().equals("CONFIRMED")) return r;

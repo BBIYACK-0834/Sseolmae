@@ -63,7 +63,7 @@ export function MyBookings({ session }) {
         await request(
           action === 'cancel'
             ? '/reservations/' + row.id
-            : '/payments/' + row.id + '/retry',
+            : '/payments/' + row.id + (action === 'refund' ? '/refund' : '/retry'),
           {
             method: action === 'cancel' ? 'DELETE' : 'POST',
             csrf: session.csrf,
@@ -95,7 +95,7 @@ export function MyBookings({ session }) {
       {rows?.map((r) => (
         <article className="order" key={r.id}>
           <strong>{labels[r.ticketType]}</strong>
-          <b>{states[r.status]}</b>
+          <b>{r.admittedAt ? '입장 완료' : r.refundRequested ? (r.status==='CANCELLED'?'환불 완료':'환불 확인 중') : states[r.status]}</b>
           <p>
             {date(r.startsAt)} · {r.adults + r.children}명 · {won(r.amount)}
           </p>
@@ -117,6 +117,9 @@ export function MyBookings({ session }) {
                   예약 취소
                 </button>
               </>
+            )}
+            {r.status === 'CONFIRMED' && !r.admittedAt && (r.refundRequested || Date.parse(r.startsAt)>Date.now()) && (
+              <button disabled={busy} onClick={() => {if(r.refundRequested || window.confirm('예약 전체를 취소하고 전액 환불할까요?')) act(r,'refund')}}>{r.refundRequested?'환불 다시 확인':'전액 환불'}</button>
             )}
             {r.status === 'PROCESSING' && (
               <button disabled={busy} onClick={() => act(r, 'retry')}>
@@ -326,7 +329,8 @@ export default function ReservationForm({ session, initialType }) {
               {error} <a href="#mine">내 예약 보기 →</a>
             </p>
           )}
-          <div className="booking-total"><span>총 {count}명</span><strong>{slot ? won(slot.price * count) : '회차 선택 후 금액 표시'}</strong></div>
+          {slot && <p>성인 {won(slot.price)} · 어린이 {won(slot.childPrice)} / 1인</p>}
+          <div className="booking-total"><span>총 {count}명</span><strong>{slot ? won(slot.price * adults + slot.childPrice * children) : '회차 선택 후 금액 표시'}</strong></div>
           {session.userId && !session.clientKey && <p className="notice">결제 서비스 준비 중입니다.</p>}
           {session.userId ? (
             <button disabled={!count || !slot || slot.remaining < count || !session.clientKey || busy}>

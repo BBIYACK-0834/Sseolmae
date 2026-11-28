@@ -1,3 +1,4 @@
+import Staff from './Staff'
 import Login from './Login'
 import { createRoot } from 'react-dom/client'
 import { useEffect, useState } from 'react'
@@ -109,6 +110,7 @@ function App() {
                 {name}
               </a>
             ))}
+            {session?.staff && <a href="#staff">운영 관리</a>}
           </nav>
           {session?.userId ? (
             <button className="account" onClick={logout}>
@@ -186,7 +188,7 @@ function App() {
                     '이용 요금',
                     '이용권별 1인 요금과 결제 금액은 회차 선택 후 표시됩니다.',
                   ],
-                  ['오시는 길', '시설 주소와 주차 정보는 추후 안내합니다.'],
+                  ['오시는 길', import.meta.env.VITE_VISIT_ADDRESS || '시설 주소와 주차 정보는 추후 안내합니다.'],
                 ].map(([s, d]) => (
                   <article key={s}>
                     <h3>{s}</h3>
@@ -223,6 +225,8 @@ function App() {
                   location.hash = 'mine'
                 }}
               />
+            ) : route === 'staff' ? (
+              session.staff ? <Staff session={session}/> : <p>운영자 권한이 필요합니다.</p>
             ) : route === 'mine' ? (
               <MyBookings session={session} />
             ) : ['login','signup','login-after-signup'].includes(route) ? (

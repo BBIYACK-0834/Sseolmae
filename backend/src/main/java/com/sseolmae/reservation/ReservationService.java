@@ -24,7 +24,7 @@ public class ReservationService {
   }
 
   public record Slot(
-      UUID id, TicketType ticketType, OffsetDateTime startsAt, int price, int remaining) {}
+      UUID id, TicketType ticketType, OffsetDateTime startsAt, int price, int childPrice, int remaining) {}
 
   private static final String OCCUPIED =
       """
@@ -44,6 +44,7 @@ public class ReservationService {
         TicketType.valueOf(r.getString("ticket_type")),
         r.getObject("starts_at", OffsetDateTime.class),
         r.getInt("price"),
+        r.getObject("child_price") == null ? r.getInt("price") : r.getInt("child_price"),
         r.getInt("remaining"));
   }
 
@@ -60,7 +61,7 @@ public class ReservationService {
         r.getInt("children"),
         r.getInt("amount"),
         state,
-        expiry);
+        expiry, r.getBoolean("refund_requested"), r.getObject("admitted_at", OffsetDateTime.class));
   }
 
   private OffsetDateTime now() {
@@ -69,7 +70,7 @@ public class ReservationService {
 
   public List<Slot> slots() {
     return db.query(
-        SLOT + "WHERE s.starts_at>? ORDER BY s.starts_at,s.ticket_type", this::slot, now(), now());
+        SLOT + "WHERE s.sale_open AND s.starts_at>? ORDER BY s.starts_at,s.ticket_type", this::slot, now(), now());
   }
 
   public List<Reservation> list(UUID user) {
@@ -107,7 +108,7 @@ public class ReservationService {
         .isEmpty()) throw new ResponseStatusException(NOT_FOUND, "회차를 찾을 수 없습니다.");
     var time = now();
     var slot = db.queryForObject(SLOT + "WHERE s.id=?", this::slot, time, request.slotId());
-    if (!slot.startsAt().isAfter(time) || slot.remaining() < guests)
+    if (!Boolean.TRUE.equals(db.queryForObject("SELECT sale_open FROM visit_slot WHERE id=?",Boolean.class,slot.id())) || !slot.startsAt().isAfter(time) || slot.remaining() < guests)
       throw new ResponseStatusException(CONFLICT, "예약 가능한 잔여 좌석을 확인해 주세요.");
     var expires = time.plusMinutes(10);
     if (slot.startsAt().isBefore(expires)) expires = slot.startsAt();
@@ -123,7 +124,7 @@ public class ReservationService {
         request.requestId(),
         request.adults(),
         request.children(),
-        Math.multiplyExact(slot.price(), guests),
+        Math.toIntExact((long)slot.price()*request.adults() + (long)slot.childPrice()*request.children()),
         expires);
     return get(user, id);
   }

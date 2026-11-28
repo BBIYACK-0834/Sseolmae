@@ -27,3 +27,5 @@ venue:
   kakao-secret: ${KAKAO_CLIENT_SECRET:}
   toss-client: ${TOSS_CLIENT_KEY:}
   toss-secret: ${TOSS_SECRET_KEY:}
+  backup-enabled: ${BACKUP_ENABLED:false}
+  backup-dir: ${BACKUP_DIR:}

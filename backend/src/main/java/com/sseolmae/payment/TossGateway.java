@@ -53,6 +53,12 @@ public class TossGateway {
       throw new ResponseStatusException(SERVICE_UNAVAILABLE, "결제 연동을 준비하고 있습니다.");
   }
 
+  public Result refund(UUID id, String key, int amount) {
+    requireSetup();
+    return client.post().uri("/{key}/cancel", key).header("Idempotency-Key","refund-" + id)
+        .body(Map.of("cancelReason","방문 전 고객 요청", "cancelAmount",amount)).retrieve().body(Result.class);
+  }
+
   public Result lookup(UUID id) {
     requireSetup();
     return client.get().uri("/orders/{id}", id).retrieve().body(Result.class);

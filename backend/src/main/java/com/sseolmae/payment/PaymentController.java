@@ -27,6 +27,11 @@ public class PaymentController {
     return payments.confirm(accounts.id(auth), input.orderId(), input.paymentKey(), input.amount());
   }
 
+  @PostMapping("/{id}/refund")
+  Reservation refund(Authentication auth, @PathVariable UUID id) {
+    return payments.refund(accounts.id(auth),id);
+  }
+
   @PostMapping("/{id}/retry")
   Reservation retry(Authentication auth, @PathVariable UUID id) {
     return payments.retry(accounts.id(auth), id);

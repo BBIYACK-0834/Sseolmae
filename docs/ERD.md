@@ -24,6 +24,8 @@ erDiagram
         varchar ticket_type
         timestamptz starts_at
         int capacity
+        int child_price
+        boolean sale_open
         int price
     }
     BOOKING {
@@ -31,6 +33,9 @@ erDiagram
         uuid user_id FK
         uuid slot_id FK
         uuid request_id
+        boolean refund_requested
+        timestamptz admitted_at
+        uuid admitted_by FK
         int adults
         int children
         int amount
@@ -40,6 +45,7 @@ erDiagram
     PAYMENT {
         uuid booking_id PK,FK
         varchar payment_key UK
+        timestamptz next_check_at
         timestamptz approved_at
     }
 ```
@@ -54,4 +60,4 @@ erDiagram
 
 **좌석과 확정** — 예약 시 DB에서 회차를 잠그고 잔여 좌석을 다시 계산한다. 결제 대기 좌석은 최대 10분 동안 확보한다. 유효기한이 지나면 조회 결과에 EXPIRED로 표시되고 잔여석으로 돌아간다. 결제 승인 확인 중인 PROCESSING 좌석과 확정 좌석은 계속 차감한다.
 
-**승인 흐름** — PENDING → PROCESSING → CONFIRMED. 결제사 결과가 불명확하면 PROCESSING을 유지한다. 같은 주문의 승인 재요청에는 동일한 멱등 키를 사용하고 이미 확정된 주문은 저장된 예약을 반환한다. 사용자는 결제 전 예약을 취소할 수 있다. 결제 후 환불은 이 버전의 기능 범위 밖이다.
+**승인 흐름** — PENDING → PROCESSING → CONFIRMED. 결제사 결과가 불명확하면 PROCESSING을 유지한다. 같은 주문의 승인 재요청에는 동일한 멱등 키를 사용하고 이미 확정된 주문은 저장된 예약을 반환한다. 사용자는 결제 전 예약을 취소할 수 있다. 회차 시작 전 미입장 확정 예약은 전액 환불을 요청할 수 있다. 환불 결과 확인 전에는 좌석을 유지한다.

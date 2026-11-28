@@ -12,4 +12,4 @@ public record Reservation(
     int children,
     int amount,
     String status,
-    OffsetDateTime expiresAt) {}
+    OffsetDateTime expiresAt, boolean refundRequested, OffsetDateTime admittedAt) {}
